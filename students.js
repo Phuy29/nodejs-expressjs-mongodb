@@ -1,50 +1,38 @@
 const express = require("express");
+
 const studentRouter = express.Router();
 
-const log = require("./log.js");
-
-const requireApiKey = (req, res, next) => {
-  if (req.query.api_key) {
-    req.hasApiKey = true;
-  }
+const log = (req, res, next) => {
+  console.log("New req student at", new Date());
   next();
 };
 
 studentRouter.use(log);
 
-const student = [
-  {
-    name: "Bob",
-    age: 11,
-  },
-  {
-    name: "Alice",
-    age: 10,
-  },
-  {
-    name: "Bin",
-    age: 10,
-  },
+const requireApiKey = (req, res, next) => {
+  students.forEach((student) => {
+    if (req.query.api_key == student.apiKey) {
+      req.hasApiKey = true;
+      return;
+    }
+  });
+  next();
+};
+
+studentRouter.use(requireApiKey);
+
+const students = [
+  { username: "alice", apiKey: "alice@123" },
+  { username: "bob", apiKey: "bob@123" },
+  { username: "charlie", apiKey: "charlie@123" },
 ];
 
-studentRouter.get("/", requireApiKey, (req, res) => {
+studentRouter.get("/", (req, res) => {
   if (req.hasApiKey) {
-    res.json(student);
+    res.json(students);
   } else {
-    res.send("Api key is missing");
+    res.send("Api key is missing!!!");
   }
-});
-
-studentRouter.get("/add", (req, res) => {
-  student.push({ name: "Huy", age: 19 });
-});
-
-studentRouter.get("/:id/class/:classId", (req, res) => {
-  res.send(req.params);
-});
-
-studentRouter.get("/search", (req, res) => {
-  res.send(req.query);
 });
 
 module.exports = studentRouter;
